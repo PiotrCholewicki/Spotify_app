@@ -82,7 +82,7 @@ public class ApiController {
             System.out.println("Exception occured while getting user code " + e);
         }
         response.sendRedirect( customIp+ "/user-top-tracks?userId="+user.getId());
-        userTopTracksService.addTopSongsToDatabase(user.getId());
+        //userTopTracksService.addTopSongsToDatabase(user.getId(), "medium_term");
 
     }
 
