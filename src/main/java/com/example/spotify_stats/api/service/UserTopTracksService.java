@@ -33,7 +33,7 @@ public class UserTopTracksService {
     private SongDTO songDTO;
 
     //returns logged user's top tracks
-    public Track[] fetchUserTopTracks(String userId, String time_range){
+    public Track[] fetchUserTopTracks(String userId, String time_range, int offset){
 
         //its mandatory for every function in order to establish authentication with spotify
         UserDetails userDetails = userDetailsRepository.findByRefId(userId);
@@ -46,13 +46,14 @@ public class UserTopTracksService {
         final GetUsersTopTracksRequest getUsersTopTracksRequest = object.getUsersTopTracks()
                 .time_range(time_range)
                 .limit(50)
-                .offset(0)
+                .offset(offset)
                 .build();
+
         try{
             final Paging<Track> trackPaging = getUsersTopTracksRequest.execute();
             Track[] tracks = trackPaging.getItems();
-            System.out.println("Fetched " + trackPaging.getTotal() + " top tracks for user " + userId);
-            System.out.println(Arrays.toString(tracks));
+            //System.out.println("Fetched " + trackPaging.getTotal() + " top tracks for user " + userId);
+            //System.out.println(Arrays.toString(tracks));
 
             return trackPaging.getItems();
         }
@@ -62,66 +63,112 @@ public class UserTopTracksService {
         }
         return new Track[0];
     }
+    //if no offset is given call with "default" parameter = 0
+    public Track[] fetchUserTopTracks(String userId, String time_range) {
+        return fetchUserTopTracks(userId, time_range, 0);
+    }
+    //it is used to map only the necessary fields to frontend
+    public Song mapSpotifyTracksToSongs(Track track){
+         Song song = new Song();
+         song.setSongName(track.getName());
+         song.setSpotifyUrl(track.getExternalUrls().get("spotify"));
+         song.setImageUrl(track.getAlbum().getImages()[0].getUrl());
 
-//    //it is used to map only the necessary fields to frontend
-//    public Song mapSpotifyTracksToSongs(Track track){
-//         Song song = new Song();
-//         song.setSongName(track.getName());
-//         song.setSpotifyUrl(track.getExternalUrls().get("spotify"));
-//         song.setImageUrl(track.getAlbum().getImages()[0].getUrl());
-//
-//         if(track.getArtists().length > 1){
-//             StringBuilder artistList = new StringBuilder();
-//             for(int i = 0; i < track.getArtists().length; i++){
-//                 artistList.append(track.getArtists()[i].getName());
-//                 if (i < track.getArtists().length - 1) {
-//                     artistList.append(", ");
-//                 }
-//             }
-//             song.setArtist(artistList.toString());
-//         }
-//         else{
-//            song.setArtist(track.getArtists()[0].getName());
-//         }
-//        return song;
-//    }
-//    public List<Song> addTopSongsToDatabase(String userId, String time_range){
-//        //first delete all the data from the past
-//        songRepository.deleteAll();
-//        //download data from API
-//        Track[] topTracks = fetchUserTopTracks(userId, time_range);
-//        //add songs to database
-//        for(Track track : topTracks){
-//            Song song = mapSpotifyTracksToSongs(track);
-//            song.setUserRefId(userId);
-//            songRepository.save(song);
-//        }
-//        //read all the songs from the database
-//        return songRepository.findAllByUserRefId(userId);
-//    }
-    public List<SongDTO> getSongDTO(String userId, String time_range){
-        List<SongDTO> topSongsDTO = new ArrayList<SongDTO>();
-        Track[] tracks = fetchUserTopTracks(userId, time_range);
-        for(Track song: tracks){
+         if(track.getArtists().length > 1){
+             StringBuilder artistList = new StringBuilder();
+             for(int i = 0; i < track.getArtists().length; i++){
+                 artistList.append(track.getArtists()[i].getName());
+                 if (i < track.getArtists().length - 1) {
+                     artistList.append(", ");
+                 }
+             }
+             song.setArtist(artistList.toString());
+         }
+         else{
+            song.setArtist(track.getArtists()[0].getName());
+         }
+        return song;
+    }
+    public List<Song> addTopSongsToDatabase(String userId){
+        //first delete all the data from the past
+        songRepository.deleteAllByUserRefId(userId);
+        //download data from API
 
-            //we export only the necessary info to the frontend
-            SongDTO smallerSong = new SongDTO();
-            StringBuilder artists = new StringBuilder();
-            for(int i = 0; i < song.getArtists().length; i++){
-                artists.append(song.getArtists()[i].getName());
-                if(i != song.getArtists().length - 1){
-                    artists.append(", ");
-                }
+        for(int i = 0; i < 1000; i+=50){
+            Track[] topTracks = fetchUserTopTracks(userId, "long_term", i);
+            if(topTracks.length == 0) break; // no more results
+            //add songs to database
+            for(Track track : topTracks){
+                Song song = mapSpotifyTracksToSongs(track);
+                song.setTime_range("long_term");
+                song.setUserRefId(userId);
+                songRepository.save(song);
+                System.out.println("Inserting song into database");
             }
-            smallerSong.setArtist(artists.toString());
+        }
 
-            smallerSong.setTitle(song.getName());
-            smallerSong.setImageUrl(song.getAlbum().getImages()[0].getUrl());
-            smallerSong.setSongUrl(song.getExternalUrls().get("spotify"));
-            smallerSong.setTime_range(time_range);
-            topSongsDTO.add(smallerSong);
+
+        //read all the songs from the database
+        songRepository.findAllByUserRefId(userId);
+        return songRepository.findAllByUserRefId(userId);
+    }
+    public List<SongDTO> getSongDTO(String userId, String time_range){
+        List<SongDTO> topSongsDTO = new ArrayList<>();
+        if(Objects.equals(time_range, "long_term")){
+            //fetch 1000 results if long term
+            if(songRepository.findAllByUserRefId(userId).isEmpty()){
+                addTopSongsToDatabase(userId);
+            }
+            List<Song> songList = songRepository.findAllByUserRefId(userId);
+            List<SongDTO> songDTOs = new ArrayList<>();
+            for(Song song : songList){
+                songDTOs.add(mapSongToDTO(song));
+            }
+            return songDTOs;
+
+        }
+        else{
+            //fetch first 50 results if medium or short term
+            Track[] tracks = fetchUserTopTracks(userId, time_range, 0);
+            for(Track song: tracks){
+                //we export only the necessary info to the frontend
+                SongDTO smallerSong = new SongDTO();
+                StringBuilder artists = new StringBuilder();
+                for(int i = 0; i < song.getArtists().length; i++){
+                    artists.append(song.getArtists()[i].getName());
+                    if(i != song.getArtists().length - 1){
+                        artists.append(", ");
+                    }
+                }
+                smallerSong.setArtist(artists.toString());
+
+                smallerSong.setTitle(song.getName());
+                smallerSong.setImageUrl(song.getAlbum().getImages()[0].getUrl());
+                smallerSong.setSongUrl(song.getExternalUrls().get("spotify"));
+                smallerSong.setTime_range(time_range);
+                topSongsDTO.add(smallerSong);
+            }
         }
         return topSongsDTO;
     }
+    public SongDTO mapSongToDTO(Song song){
+        SongDTO songDTO = new SongDTO();
+        songDTO.setSongUrl(song.getSpotifyUrl());
+        songDTO.setArtist(song.getArtist());
+        songDTO.setTitle(song.getSongName());
+        songDTO.setTime_range(song.getTime_range());
+        songDTO.setImageUrl(song.getImageUrl());
+        return songDTO;
+    }
+    public List<SongDTO> getUserTopTracksByArtist(String userId, String artist) {
+        List<Song> allSongs = songRepository.findByUserRefIdAndArtistContainingIgnoreCase(userId, artist);
 
+        // if no data, save it to API
+        if (allSongs.isEmpty()) {
+            addTopSongsToDatabase(userId);
+            allSongs = songRepository.findByUserRefIdAndArtistContainingIgnoreCase(userId, artist);
+        }
+
+        return allSongs.stream().map(this::mapSongToDTO).toList();
+    }
 }

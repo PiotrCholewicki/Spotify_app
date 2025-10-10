@@ -81,7 +81,7 @@ public class ApiController {
         catch(Exception e){
             System.out.println("Exception occured while getting user code " + e);
         }
-        response.sendRedirect( customIp+ "/user-top-tracks?userId="+user.getId());
+        response.sendRedirect( customIp+ "/home?userId="+user.getId());
         //userTopTracksService.addTopSongsToDatabase(user.getId(), "medium_term");
 
     }
@@ -106,6 +106,9 @@ public class ApiController {
         return userTopTracksService.getSongDTO(userId, time_range);
     }
 
-
+    @GetMapping(value = "user-top-tracks/by-artist")
+    public List<SongDTO> userTopTracksByArtist(@RequestParam String userId, @RequestParam String artist){
+        return userTopTracksService.getUserTopTracksByArtist(userId, artist);
+    }
 
 }
