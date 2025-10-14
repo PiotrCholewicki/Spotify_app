@@ -7,9 +7,7 @@ import java.util.List;
 
 public interface SongRepository extends JpaRepository<Song, Integer> {
     List<Song> findAllByUserRefId(String userRefId);
-    List<Song> findByUserRefIdAndArtist(String userRefId, String artist);
     void deleteAllByUserRefId(String userRefId);
-    boolean existsByUserRefIdAndSpotifyUrl(String userRefId, String spotifyUrl);
-
     List<Song> findByUserRefIdAndArtistContainingIgnoreCase(String userId, String artist);
+
 }

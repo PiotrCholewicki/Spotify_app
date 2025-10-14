@@ -1,1 +1,1 @@
-zrobic obsluge bazy danych do cachowania zeby nie wysylac za kazdym razem callu do api
+W przypadku pustej bazy danych strone trzeba przeladowac

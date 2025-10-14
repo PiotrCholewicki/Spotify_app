@@ -30,7 +30,6 @@ public class UserTopTracksService {
     @Autowired
     private SpotifyConfiguration spotifyConfiguration;
 
-    private SongDTO songDTO;
 
     //returns logged user's top tracks
     public Track[] fetchUserTopTracks(String userId, String time_range, int offset){
@@ -72,7 +71,13 @@ public class UserTopTracksService {
          Song song = new Song();
          song.setSongName(track.getName());
          song.setSpotifyUrl(track.getExternalUrls().get("spotify"));
-         song.setImageUrl(track.getAlbum().getImages()[0].getUrl());
+        if(track.getAlbum().getImages() != null && track.getAlbum().getImages().length > 0)
+        {
+            song.setImageUrl(track.getAlbum().getImages()[0].getUrl());
+        }
+        else{
+            song.setImageUrl(null);
+        }
 
          if(track.getArtists().length > 1){
              StringBuilder artistList = new StringBuilder();
@@ -94,7 +99,7 @@ public class UserTopTracksService {
         songRepository.deleteAllByUserRefId(userId);
         //download data from API
 
-        for(int i = 0; i < 1000; i+=50){
+        for(int i = 0; i < 200; i+=50){
             Track[] topTracks = fetchUserTopTracks(userId, "long_term", i);
             if(topTracks.length == 0) break; // no more results
             //add songs to database
@@ -131,7 +136,7 @@ public class UserTopTracksService {
             //fetch first 50 results if medium or short term
             Track[] tracks = fetchUserTopTracks(userId, time_range, 0);
             for(Track song: tracks){
-                //we export only the necessary info to the frontend
+                //we export only the necessary info to the frontend, thats why we use DTO
                 SongDTO smallerSong = new SongDTO();
                 StringBuilder artists = new StringBuilder();
                 for(int i = 0; i < song.getArtists().length; i++){
@@ -166,9 +171,10 @@ public class UserTopTracksService {
         // if no data, save it to API
         if (allSongs.isEmpty()) {
             addTopSongsToDatabase(userId);
+
             allSongs = songRepository.findByUserRefIdAndArtistContainingIgnoreCase(userId, artist);
         }
-
+        //declarative method to map all the songs at once to DTO
         return allSongs.stream().map(this::mapSongToDTO).toList();
     }
 }

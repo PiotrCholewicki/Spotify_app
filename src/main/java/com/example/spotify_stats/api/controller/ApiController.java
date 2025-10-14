@@ -1,10 +1,13 @@
 package com.example.spotify_stats.api.controller;
 
 import com.example.spotify_stats.api.config.SpotifyConfiguration;
+import com.example.spotify_stats.api.dto.ArtistDTO;
 import com.example.spotify_stats.api.dto.SongDTO;
 import com.example.spotify_stats.api.persistence.entity.UserDetails;
+import com.example.spotify_stats.api.persistence.repository.ArtistRepository;
 import com.example.spotify_stats.api.persistence.repository.UserDetailsRepository;
 import com.example.spotify_stats.api.service.UserProfileService;
+import com.example.spotify_stats.api.service.UserTopArtistsService;
 import com.example.spotify_stats.api.service.UserTopTracksService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,11 @@ public class ApiController {
     @Autowired
     SpotifyConfiguration spotifyConfiguration;
 
+    @Autowired
+    UserTopArtistsService userTopArtistsService;
+
+    @Autowired
+    ArtistRepository artistRepository;
 
     @Autowired
     UserProfileService userProfileService;
@@ -94,7 +102,7 @@ public class ApiController {
             return userId;
         }
         catch (Exception e) {
-            System.out.println("Exception occured while landing to home page: " + e);
+            System.out.println("Exception occurred while landing to home page: " + e);
         }
         return null;
     }
@@ -109,6 +117,11 @@ public class ApiController {
     @GetMapping(value = "user-top-tracks/by-artist")
     public List<SongDTO> userTopTracksByArtist(@RequestParam String userId, @RequestParam String artist){
         return userTopTracksService.getUserTopTracksByArtist(userId, artist);
+    }
+    @GetMapping(value = "user-top-artists")
+    public List<ArtistDTO> userTopArtist(@RequestParam String userId, @RequestParam(defaultValue = "medium_term") String time_range){
+
+        return userTopArtistsService.getArtistDTO(userId, time_range);
     }
 
 }
