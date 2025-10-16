@@ -2,20 +2,15 @@ package com.example.spotify_stats.api.persistence.entity;
 
 import java.io.Serializable;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Table(name = "USER_DETAILS")
 @Data
-public class UserDetails implements Serializable {
-    private static final long serialVersionUID = 3937414011943770889L;
-
+public class UserDetails {
     @Id
-    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "ACCESS_TOKEN", length = 2000)

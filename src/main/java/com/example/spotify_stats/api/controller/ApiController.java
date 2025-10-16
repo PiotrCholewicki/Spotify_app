@@ -89,6 +89,7 @@ public class ApiController {
         catch(Exception e){
             System.out.println("Exception occured while getting user code " + e);
         }
+        System.out.println("Custom frontend URL: " + customIp);
         response.sendRedirect( customIp+ "/home?userId="+user.getId());
         //userTopTracksService.addTopSongsToDatabase(user.getId(), "medium_term");
 
