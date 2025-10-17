@@ -1,4 +1,4 @@
-## Spotify Stats App — README
+## Spotify Stats App - README
 
 ### Opis projektu
 Spotify Stats App to aplikacja webowa, która pozwala użytkownikom zalogować się na konto Spotify i zobaczyć swoje:
