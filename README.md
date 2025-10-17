@@ -99,17 +99,14 @@ Aplikacja backendowa działa na porcie `8080`, frontend na `5173`, w Dockerze fr
 5. Użytkownik może teraz przeglądać swoje statystyki.
 
 ### Najczęstsze problemy
+```
+Problem	Przyczyna	Rozwiązanie
+Spotify forbidden for this user: Forbidden	Konto nie dodane do aplikacji	Wejdź w Spotify Dashboard → „Users and Access” → dodaj adres e-mail użytkownika
+Invalid redirect_uri	Błędny redirect URI	Upewnij się, że w Dashboardzie i w application.properties redirect URI są identyczne
+404 Not Found przy home	Frontend nie działa w Dockerze / innym porcie	Sprawdź custom.server.ip
+JAVA_HOME not defined	Brak konfiguracji JDK w PATH	Ustaw JAVA_HOME=C:\Users\<user>\.jdks\<jdk-version> i dodaj \bin do PATH
+```
 
-| Problem                                      | Przyczyna                                     | Rozwiązanie                                                                      
-| `Spotify forbidden for this user: Forbidden` | Konto nie dodane do aplikacji                 | Wejdź w Spotify Dashboard → „Users and Access” → dodaj adres e-mail użytkownika  
-| `Invalid redirect_uri`                       | Błędny redirect URI                           | Upewnij się, że w Dashboardzie i w `application.properties` redirect URI są                                                                                                                                                                             identyczne
-| `404 Not Found` przy `home`                  | Frontend nie działa w Dockerze / innym porcie | Sprawdź `custom.server.ip`
-| `JAVA_HOME not defined`                      | Brak konfiguracji JDK w PATH                  | Ustaw `JAVA_HOME=C:\Users\<user>\.jdks\<jdk-version>` i dodaj `\bin` do PATH
-
----
-
-
----
 
 ### Struktura projektu
 
