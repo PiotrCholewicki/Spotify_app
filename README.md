@@ -1,17 +1,6 @@
-Świetnie 🎉 — czyli faktycznie chodziło o **Spotify Developer Dashboard / Users and Access**!
-To jest bardzo częsta pułapka przy integracjach Spotify, więc dobrze, że to już działa 💪
+## Spotify Stats App — README
 
-Poniżej masz gotową sekcję **README.md**, którą możesz wkleić na koniec swojego projektu.
-Zawiera opis konfiguracji, uruchomienia i najczęstszych problemów (w tym ten z „Forbidden”).
-
----
-
-```markdown
----
-
-## 🎧 Spotify Stats App — README
-
-### 📖 Opis projektu
+### Opis projektu
 Spotify Stats App to aplikacja webowa, która pozwala użytkownikom zalogować się na konto Spotify i zobaczyć swoje:
 - najczęściej słuchane utwory (`Top Tracks`)
 - najczęściej słuchanych artystów (`Top Artists`)
@@ -19,9 +8,7 @@ Spotify Stats App to aplikacja webowa, która pozwala użytkownikom zalogować s
 
 Backend napisany jest w **Spring Boot (Java 21+)**, frontend w **React (Vite + TypeScript)**.
 
----
-
-### 🧩 Technologie
+### Technologie
 
 #### Backend
 - Spring Boot 3.x
@@ -34,9 +21,8 @@ Backend napisany jest w **Spring Boot (Java 21+)**, frontend w **React (Vite + T
 - Tailwind CSS
 - Vite
 
----
 
-### ⚙️ Konfiguracja środowiska
+### Konfiguracja środowiska
 
 #### 1. Klucze Spotify API
 1. Wejdź na [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
@@ -52,7 +38,6 @@ Backend napisany jest w **Spring Boot (Java 21+)**, frontend w **React (Vite + T
 ````
 5. W sekcji **Users and Access** dodaj wszystkie konta Spotify, które mają mieć dostęp (do 25 w trybie development).
 
----
 
 #### 2. Plik `application.properties`
 
@@ -78,7 +63,6 @@ spring.datasource.password=haslo
 spring.jpa.hibernate.ddl-auto=update
 ````
 
----
 
 #### 3. Uruchomienie aplikacji
 
@@ -94,7 +78,7 @@ npm install
 npm run dev
 ```
 
-Aplikacja backendowa działa na porcie `8080`, frontend na `5173`, w Dockerze frontend na 3000
+Aplikacja backendowa działa na porcie `8080`, frontend na `5173`, w Dockerze frontend na `3000`
 
 ---
 
@@ -114,16 +98,13 @@ Aplikacja backendowa działa na porcie `8080`, frontend na `5173`, w Dockerze fr
    ```
 5. Użytkownik może teraz przeglądać swoje statystyki.
 
----
-
 ### Najczęstsze problemy
 
-| Problem                                      | Przyczyna                                     | Rozwiązanie                                                                                |
-| -------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `Spotify forbidden for this user: Forbidden` | Konto nie dodane do aplikacji                 | Wejdź w Spotify Dashboard → „Users and Access” → dodaj adres e-mail użytkownika            |
-| `Invalid redirect_uri`                       | Błędny redirect URI                           | Upewnij się, że w Dashboardzie i w `application.properties` redirect URI są **identyczne** |
-| `404 Not Found` przy `home`                  | Frontend nie działa w Dockerze / innym porcie | Sprawdź `custom.server.ip`                                                                 |
-| `JAVA_HOME not defined`                      | Brak konfiguracji JDK w PATH                  | Ustaw `JAVA_HOME=C:\Users\<user>\.jdks\<jdk-version>` i dodaj `\bin` do PATH               |
+| Problem                                      | Przyczyna                                     | Rozwiązanie                                                                      
+| `Spotify forbidden for this user: Forbidden` | Konto nie dodane do aplikacji                 | Wejdź w Spotify Dashboard → „Users and Access” → dodaj adres e-mail użytkownika  
+| `Invalid redirect_uri`                       | Błędny redirect URI                           | Upewnij się, że w Dashboardzie i w `application.properties` redirect URI są                                                                                                                                                                             identyczne
+| `404 Not Found` przy `home`                  | Frontend nie działa w Dockerze / innym porcie | Sprawdź `custom.server.ip`
+| `JAVA_HOME not defined`                      | Brak konfiguracji JDK w PATH                  | Ustaw `JAVA_HOME=C:\Users\<user>\.jdks\<jdk-version>` i dodaj `\bin` do PATH
 
 ---
 
