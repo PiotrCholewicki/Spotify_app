@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.exceptions.detailed.ForbiddenException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Track;
@@ -69,31 +70,28 @@ public class ApiController {
     }
     @GetMapping("get-user-code")
     public void getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
-        SpotifyApi object = spotifyConfiguration.getSpotifyObject();
-
-        AuthorizationCodeRequest authorizationCodeRequest = object.authorizationCode(userCode).build();
+        SpotifyApi spotifyApi = spotifyConfiguration.createSpotifyApi(); //new object for the session
         User user = null;
 
-        try{
-            final AuthorizationCodeCredentials authorizationCode = authorizationCodeRequest.execute();
+        try {
+            AuthorizationCodeCredentials authCode = spotifyApi.authorizationCode(userCode).build().execute();
+            spotifyApi.setAccessToken(authCode.getAccessToken());
+            spotifyApi.setRefreshToken(authCode.getRefreshToken());
 
-            object.setAccessToken(authorizationCode.getAccessToken());
-            object.setRefreshToken(authorizationCode.getRefreshToken());
-
-            final GetCurrentUsersProfileRequest getCurrentUsersProfile = object.getCurrentUsersProfile().build();
-            user = getCurrentUsersProfile.execute();
-
-            userProfileService.insertOrUpdateUserDetails(user, authorizationCode.getAccessToken(), authorizationCode.getRefreshToken());
+            user = spotifyApi.getCurrentUsersProfile().build().execute();
+            userProfileService.insertOrUpdateUserDetails(user, authCode.getAccessToken(), authCode.getRefreshToken());
             System.out.println("Saving user to DB: " + user.getId());
-        }
-        catch(Exception e){
-            System.out.println("Exception occured while getting user code " + e);
-        }
-        System.out.println("Custom frontend URL: " + customIp);
-        response.sendRedirect( customIp+ "/home?userId="+user.getId());
-        //userTopTracksService.addTopSongsToDatabase(user.getId(), "medium_term");
 
+            response.sendRedirect(customIp + "/home?userId=" + user.getId());
+        } catch (ForbiddenException e) {
+            System.out.println("Spotify forbidden for this user: " + e.getMessage());
+            response.sendRedirect(customIp + "/login?error=forbidden");
+        } catch (Exception e) {
+            System.out.println("Exception occured while getting user code " + e);
+            response.sendRedirect(customIp + "/login?error=unknown");
+        }
     }
+
 
     @GetMapping(value = "home")
     public String home(@RequestParam String userId){

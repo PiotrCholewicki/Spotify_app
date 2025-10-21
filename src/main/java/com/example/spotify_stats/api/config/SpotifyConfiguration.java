@@ -19,6 +19,15 @@ public class SpotifyConfiguration {
     @Value("${app.api.secret}")
     private String clientSecret;
 
+    // creates new spotifyApi object for each session
+    public SpotifyApi createSpotifyApi() {
+        URI redirectUri = SpotifyHttpManager.makeUri(customIp + "/api/get-user-code");
+        return new SpotifyApi.Builder()
+                .setClientId(clientId)
+                .setClientSecret(clientSecret)
+                .setRedirectUri(redirectUri)
+                .build();
+    }
 
     public SpotifyApi getSpotifyObject(){
         URI redirectedURL = SpotifyHttpManager.makeUri(customIp + "/api/get-user-code");

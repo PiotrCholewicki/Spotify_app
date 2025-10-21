@@ -99,7 +99,7 @@ public class UserTopTracksService {
         songRepository.deleteAllByUserRefId(userId);
         //download data from API
 
-        for(int i = 0; i < 200; i+=50){
+        for(int i = 0; i < 250; i+=50){
             Track[] topTracks = fetchUserTopTracks(userId, "long_term", i);
             if(topTracks.length == 0) break; // no more results
             //add songs to database
